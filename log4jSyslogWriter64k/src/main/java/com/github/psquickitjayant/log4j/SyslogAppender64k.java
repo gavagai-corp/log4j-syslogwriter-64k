@@ -1,6 +1,7 @@
 package com.github.psquickitjayant.log4j;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.EnhancedPatternLayout;
 import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.SyslogQuietWriter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -116,6 +117,8 @@ public class SyslogAppender64k extends AppenderSkeleton {
      * Set to true after the header of the layout has been sent or if it has none.
      */
   private boolean layoutHeaderChecked = false;
+
+  private String enhancedPatternLayoutFormatString;
 
   public
   SyslogAppender64k() {
@@ -472,6 +475,38 @@ public class SyslogAppender64k extends AppenderSkeleton {
   public final void setHeader(final boolean val) {
       header = val;
   }
+
+    public String getEnhancedPatternLayoutFormatString() {
+        return enhancedPatternLayoutFormatString;
+    }
+
+    /**
+     * In Jboss eap 6.3 you cannot create a layout manually and set it in an appender. This is a way around that. Just
+     * specify a property like so:
+     * <pre>
+     * {@code
+     *
+     * <custom-handler name="REMOTE-LOG" class="com.loggly.log4j.SyslogAppender64k" module="com.loggly.log4j">
+     *  <level name="INFO"/>
+     *  <formatter>
+     *      <pattern-formatter pattern="not used"/>
+     *  </formatter>
+     *  <properties>
+     *      <property name="SyslogHost" value="localhost"/>
+     *      <property name="Facility" value="Local3"/>
+     *      <property name="Header" value="true"/>
+     *      <property name="EnhancedPatternLayoutFormatString" value="java %d{ISO8601}{GMT} %p %t %c{1}.%M - %m%n"/>
+     *  </properties>
+     * </custom-handler>
+     *
+     * }
+     * </pre>
+     * @param formatString
+     */
+    public final void setEnhancedPatternLayoutFormatString(String formatString) {
+        this.enhancedPatternLayoutFormatString = formatString;
+        this.layout = new EnhancedPatternLayout(formatString);
+    }
 
     /**
      * Get the host name used to identify this appender.
